@@ -1,14 +1,19 @@
 {
-  "name": "solgraph",
-  "version": "0.3.2",
+  "name": "solidity-graph-generator",
+  "version": "0.4.0",
   "description": "Visualize Solidity control flow for smart contract security analysis.",
   "license": "ISC",
-  "repository": "https://github.com/raineorshine/solgraph",
-  "author": {
+  "repository": "https://github.com/justinchou/solidity-graph-generator.git",
+  "authors": [{
     "name": "Raine Revere",
     "email": "raineorshine@gmail.com",
     "url": "https://github.com/raineorshine"
-  },
+  },{
+    "name": "Justin Chou",
+    "email": "zhou78620051@126.com",
+    "url": "https://github.com/justinchou"
+  }
+  ],
   "engines": {
     "node": ">=6"
   },
