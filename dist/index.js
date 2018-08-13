@@ -1,9 +1,9 @@
-import * as solparser from 'solidity-parser-sc'
-import { Graph } from  'graphlib'
-import * as dot from  'graphlib-dot'
+const solparser = require('solidity-parser-sc');
+const { Graph } = require('graphlib');
+const dot       = require('graphlib-dot');
 
-const SEND_NODE_NAME = 'UNTRUSTED'
-const SEND_NODE_STYLE = { shape: 'rectangle' }
+const SEND_NODE_NAME  = 'UNTRUSTED';
+const SEND_NODE_STYLE = { shape: 'rectangle' };
 
 const COLORS = {
   SEND: 'red',
@@ -38,7 +38,7 @@ const graphNodeName = name => {
   return name === 'send' ? SEND_NODE_NAME : name
 }
 
-export default source => {
+module.exports = source => {
 
   // parse the Solidity source
   let ast

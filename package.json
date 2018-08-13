@@ -38,9 +38,9 @@
   "dependencies": {
     "@babel/cli": "^7.0.0-beta.51",
     "@babel/core": "^7.0.0-beta.51",
-    "@babel/preset-es2015": "^7.0.0-beta.51",
-    "@babel/preset-stage-1": "^7.0.0-beta.51",
+    "@babel/preset-stage-1": "^7.0.0-rc.1",
     "@babel/register": "^7.0.0-beta.51",
+    "babel-preset-env": "^1.7.0",
     "commander": "^2.16.0",
     "get-stdin-promise": "*",
     "graphlib": "^2.1.5",
