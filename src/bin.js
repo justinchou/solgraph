@@ -1,5 +1,3 @@
-#!/usr/bin/node
-
 const com          = require('commander');
 const pkg          = require('../package.json');
 const solgraph     = require('./index.js');

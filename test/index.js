@@ -1,6 +1,6 @@
-import * as chai from 'chai'
-import solgraph from '../src/index.js'
-import { readdirSync, readFileSync } from 'fs'
+const chai = require('chai');
+const solgraph = require('../src/index.js')
+const { readdirSync, readFileSync } = require('fs');
 const should = chai.should()
 
 /** Load a text file from the current directory */
