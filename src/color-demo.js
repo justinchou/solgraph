@@ -1,7 +1,6 @@
 const solparser = require('solidity-parser-sc');
 const { Graph } = require('graphlib');
 const dot       = require('graphlib-dot');
-const fs        = require('fs');
 
 const SEND_NODE_NAME  = 'UNTRUSTED';
 const SEND_NODE_STYLE = { shape: 'rectangle' };
@@ -40,15 +39,7 @@ const graphNodeName = name => {
 }
 
 module.exports = source => {
-  const stat = fs.stat(source);
-  if (stat.isDir()) {
-    console.log("dir %s", source);
-  }
-};
 
-
-//module.exports = source => {
-function parse(source) {
   // parse the Solidity source
   let ast
   try {
@@ -115,15 +106,3 @@ function parse(source) {
 
   return dot.write(digraph)
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -4,15 +4,17 @@
   "description": "Visualize Solidity control flow for smart contract security analysis.",
   "license": "ISC",
   "repository": "https://github.com/justinchou/solidity-graph-generator.git",
-  "authors": [{
-    "name": "Raine Revere",
-    "email": "raineorshine@gmail.com",
-    "url": "https://github.com/raineorshine"
-  },{
-    "name": "Justin Chou",
-    "email": "zhou78620051@126.com",
-    "url": "https://github.com/justinchou"
-  }
+  "authors": [
+    {
+      "name": "Raine Revere",
+      "email": "raineorshine@gmail.com",
+      "url": "https://github.com/raineorshine"
+    },
+    {
+      "name": "Justin Chou",
+      "email": "zhou78620051@126.com",
+      "url": "https://github.com/justinchou"
+    }
   ],
   "engines": {
     "node": ">=6"
@@ -39,6 +41,7 @@
   },
   "dependencies": {
     "commander": "^2.16.0",
+    "debug": "^3.1.0",
     "get-stdin-promise": "*",
     "graphlib": "^2.1.5",
     "graphlib-dot": "^0.6.2",

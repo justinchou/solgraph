@@ -1,0 +1,39 @@
+digraph G {
+        fontname = "Bitstream Vera Sans"
+        fontsize = 8
+
+        node [
+                fontname = "Bitstream Vera Sans"
+                fontsize = 8
+                shape = "record"
+        ]
+
+        edge [
+                fontname = "Bitstream Vera Sans"
+                fontsize = 8
+        ]
+
+        Animal [
+                label = "{Animal|+ name : string\l+ age : int\l|+ die() : void\l}"
+        ]
+
+        Duck [
+                label = "{Duck|+ name : string\l+ age : int\l|+ die() : void\l}"
+        ]
+
+        edge [
+                arrowhead = "empty"
+        ]
+
+        Duck -> Animal
+
+        ERC20 [
+                label = "{ERC20|+ name : string\l+ symbol : string\l+ totalSupply : uint256\l+ decimals : uint256\l|+ totalSupply() : uint256\l}"
+        ]
+
+        edge [
+                arrowhead = "normal"
+        ]
+
+        ERC20 -> Animal
+}
