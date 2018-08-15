@@ -98,56 +98,28 @@ function parseSolFile(solFile, solObjects) {
     switch (item.type) {
       // import
       case "ImportStatement":
-        console.log("[ %j ]", item);
+        console.log("[ %j ]", item.from);
+        if (item.from.indexOf('/') === 0) {
+          // load from absolute path
+        } else if (item.from.indexOf('.') === 0) {
+          // load from related path
+        } else {
+          // load from node_modules
+        }
       break;
+
       // contract
       case "ContractStatement":
-        // console.log("[ %j ]", item.body);
-
         // contract is xxx
         contracts[item.name] = {is: item.is.map(item => item.name)};
 
-        // console.log(item);
         for (let contractBody of item.body) {
-          // variable
-          if (contractBody.type === "StateVariableDeclaration") {
-            let variable = {
-              name        : contractBody.name, 
-              type        : contractBody.literal.literal, 
-              visibility  : contractBody.visibility, 
-              is_constant : contractBody.is_constant, 
-              value       : contractBody.value,
-            };
-        
-            console.log(variable);
-          } else
-          // function
-          if (contractBody.type === "FunctionDeclaration") {
-            let func = {
-              name         : contractBody.name, 
-              params       : contractBody.params, 
-              modifiers    : contractBody.modifers, 
-              // body         : contractBody.body,
-              returnParams : contractBody.returnParams, 
-              is_abstract  : contractBody.is_abstract, 
-            };
-        
-            console.log(func);
-          } else
-          // event
-          if (contractBody.type === "EventDeclaration") {
-          } else
-          // modifer
-          if (contractBody.type === "ModifierDeclaration") {
-          } else
-          // struct
-          if (contractBody.type === "StructDeclaration") {
-          } else
-          // using
-          if (contractBody.type === "UsingStatement") {
-          } else
-          console.log(contractBody);
-
+          if (typeof Utils.ContractBodyType[contractBody.type] === 'function') {
+            const contractItem = Utils.ContractBodyType[contractBody.type](contractBody) + '\l';
+            contracts[item.name][contractBody.type] = contracts[item.name][contractBody.type] ? contracts[item.name][contractBody.type] + contractItem : contractItem;
+          } else {
+            console.log(contractBody);
+          }
         }
       break;
 

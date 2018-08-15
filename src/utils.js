@@ -17,7 +17,6 @@ function mkdir(path, fn) {
         if (typeof fn === 'function') fn();
     });
 }
-
 exports.mkdir = mkdir;
 
 /**
@@ -46,7 +45,6 @@ function parseOption(args) {
 
     return option;
 }
-
 exports.parseOption = parseOption;
 
 function parseParams(args) {
@@ -65,7 +63,6 @@ function parseParams(args) {
 
     return parmas;
 }
-
 exports.parseParams = parseParams;
 
 function isOkFile(file) {
@@ -74,7 +71,6 @@ function isOkFile(file) {
     const status = Fs.statSync(file);
     return status.isFile();
 }
-
 exports.isOkFile = isOkFile;
 
 function isOkDirectory(dir) {
@@ -83,18 +79,131 @@ function isOkDirectory(dir) {
     const status = Fs.statSync(dir);
     return status.isDirectory();
 }
-
 exports.isOkDirectory = isOkDirectory;
 
 function mkOutputDirectory(dir) {
     Mkdirp(dir);
 }
-
 exports.mkOutputDirectory = mkOutputDirectory;
 
 function writeOutputFile(dir, subdir, filename, contents) {
     Fs.writeFileSync(Path.join(dir, subdir, filename + '.js'), contents);
 }
-
 exports.writeOutputFile = writeOutputFile;
+
+
+
+
+
+// 解析类型(属性, 参数, 返回值)
+function _parseType(type) {
+  if (typeof type === 'string') return type;
+
+  if (type && typeof type === 'object') {
+    if (type.type === 'MappingExpression') return `map(${type.from.literal}=>${type.to.literal})`;
+  }
+
+  console.log(type);
+}
+
+// 解析函数修饰符
+function _parseFunctionModifer(modifiers, modifierRet) {
+  if (!modifiers || !Array.isArray(modifiers) || modifiers.length <= 0) return [];
+
+  const visiableMark = ['public', 'private', 'internal', 'external'];
+
+  let visibility = 'public';
+  modifiers
+    .filter(modifier => modifier.type === 'ModifierArgument')
+    .map(modifier => {
+      if (visiableMark.indexOf(modifier.name) === -1) modifierRet.push(modifier.name);
+      else visibility = modifier.name;
+    });
+
+  return visibility;
+}
+
+// 解析函数参数/返回值
+function _parseParams(params, isVoid) {
+  if (!params || !Array.isArray(params) || params.length <= 0) return isVoid ? '(void)' : '()';
+
+  let paramStr = '(';
+  let paramArr = params
+    .filter(param => param.type === 'InformalParameter')
+    .map(param => {
+      return `${param.id ? param.id + ':' : ''}${_parseType(param.literal.literal)}`
+    });
+
+  (paramArr.length === 0 && !isVoid) && paramArr.push('void');
+
+  paramStr += paramArr.join(', ') + ')';
+
+  return paramStr;
+}
+
+function _parseVariable(contractBody) {
+  const name        = contractBody.name            ;
+  const type        = contractBody.literal.literal ;
+  const visibility  = contractBody.visibility      ;
+  const is_constant = contractBody.is_constant     ;
+  const value       = contractBody.value           ;
+
+  // const variable = {name, type, visibility, is_constant, value};
+  // console.log(variable);
+
+  return `${visibility === 'public' ? '+' : '-'} ${name}${value ? '= ' + value : ''} : ${type}${is_constant ? ' CONST' : ''}`;
+}
+
+function _parseFunction(contractBody) {
+  const name         = contractBody.name         ; 
+  const params       = _parseParams(contractBody.params);
+  const modifiers    = []                        ;
+  const visibility   = _parseFunctionModifer(contractBody.modifiers, modifiers);
+  const body         = contractBody.body         ;
+  const returnParams = _parseParams(contractBody.returnParams, true);
+  const is_abstract  = contractBody.is_abstract  ;
+
+  // const func = {name, params, modifiers, visibility, returnParams, is_abstract};
+  // console.log(func);
+
+  return `${(visibility === 'public' || visibility === 'external') ? '+' : '-'} ${name}${params} : ${returnParams} ${modifiers.join(',')}${is_abstract ? ' ABSTRACT' : ''}`;
+}
+
+function _parseEvent(contractBody) {
+
+  return ``;
+}
+
+function _parseModifer(contractBody) {
+  const name       = contractBody.name         ;
+  const params     = _parseParams(contractBody.params);
+  const modifiers  = []                        ;
+  const visibility = _parseFunctionModifer(contractBody.modifiers, modifiers);
+
+  // const modifier = {name, params, modifiers, visibility};
+  // console.log(modifier);
+
+  return `${name}${params}`;
+}
+
+function _parseStruct(contractBody) {
+
+  return ``;
+}
+
+function _parseUsing(contractBody) {
+
+  return ``;
+}
+
+const ContractBodyType = {
+  "StateVariableDeclaration" : _parseVariable,
+  "FunctionDeclaration"      : _parseFunction,
+  "EventDeclaration"         : _parseEvent,
+  "ModifierDeclaration"      : _parseModifer,
+  "StructDeclaration"        : _parseStruct,
+  "UsingStatement"           : _parseUsing,
+};
+exports.ContractBodyType = ContractBodyType;
+
 
