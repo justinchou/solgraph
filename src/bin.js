@@ -26,6 +26,25 @@ $ cat MyContract.sol | solgraph > MyContract.dot
 
 Program.name('solidity-graph-generator').alias('solgraph').usage('[command] [options]').version(pkg.version, '    --version');
 
+let template = `
+digraph G {
+  fontname = "Bitstream Vera Sans"
+  fontsize = 8
+
+  node [
+    fontname = "Bitstream Vera Sans"
+    fontsize = 8
+    shape = "record"
+  ]
+
+  edge [
+    fontname = "Bitstream Vera Sans"
+    fontsize = 8
+  ]
+
+`
+
+
 Program.command('generate')
     .alias('g')
     .description(pkg.description)
@@ -50,11 +69,28 @@ Program.command('generate')
         readSolidityFilesPath(source, solFiles);
         // console.log("Files %j", files);
 
-        for (solFile of solFiles) {
+        for (let solFile of solFiles) {
           console.log("Sol File %s", solFile);
           parseSolFile(solFile, solObjects);
         }
         console.log(contracts);
+        
+        for (let contractName in contracts) {
+          if (!contracts.hasOwnProperty(contractName)) continue;
+          let contractBlock = contractName + '[label = "{' + contractName + '|';
+
+          contractBlock += contracts[contractName].StateVariableDeclaration + '|';
+          contractBlock += contracts[contractName].ModifierDeclaration + '|';
+          contractBlock += contracts[contractName].FunctionDeclaration;
+
+          contractBlock += '}"]';
+
+          template += contractBlock;
+        }
+
+        template += '}';
+
+        Fs.writeFileSync('demo.dot', template);
     });
 
 Program.parse(process.argv);
@@ -67,7 +103,7 @@ function readSolidityFilesPath(source, solFiles) {
     files = [source];
   }
 
-  for (file of files) {
+  for (let file of files) {
     const filename = file.indexOf('/') === 0 ? file : Path.join(source, file);
     if (Utils.isOkFile(filename) && Path.extname(filename) === '.sol') {
       solFiles.push(filename);
@@ -115,7 +151,7 @@ function parseSolFile(solFile, solObjects) {
 
         for (let contractBody of item.body) {
           if (typeof Utils.ContractBodyType[contractBody.type] === 'function') {
-            const contractItem = Utils.ContractBodyType[contractBody.type](contractBody) + '\l';
+            const contractItem = Utils.ContractBodyType[contractBody.type](contractBody) + '\\l';
             contracts[item.name][contractBody.type] = contracts[item.name][contractBody.type] ? contracts[item.name][contractBody.type] + contractItem : contractItem;
           } else {
             console.log(contractBody);
