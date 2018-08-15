@@ -30,33 +30,45 @@ Program.command('generate')
     .alias('g')
     .description(pkg.description)
     .option('-s, --source  [value]', 'source directory or file path of solidity files')
+    .option('-m, --module  [value]', 'node_module path if import modules form node module packages')
     .option('-t, --target  [value]', 'target dot file name')
     .action(function () {
         option = Utils.parseOption(arguments);
         params = Utils.parseParams(arguments);
 
         const source = Path.join(rootPath, params.source);
+        const module = params.module ? Path.join(rootPath, params.module) : "";
         const target = Path.join(rootPath, params.target || '.');
 
-        if (!Utils.isOkDirectory(source)) throw new Error('invalid input directory');
+        if (!Utils.isOkFile(source) && !Utils.isOkDirectory(source)) throw new Error('invalid contract source');
+        if (module && !Utils.isOkDirectory(module)) throw new Error('invalid node_module directory');
         Utils.mkOutputDirectory(target);
 
-        const files = [];
-        readSolidityFilesPath(source, files);
+        const solFiles = [];
+        const solObjects = {};
 
+        readSolidityFilesPath(source, solFiles);
         // console.log("Files %j", files);
-        for (solFile of files) {
+
+        for (solFile of solFiles) {
           console.log("Sol File %s", solFile);
-          parseSolFile(solFile);
+          parseSolFile(solFile, solObjects);
         }
+        console.log(contracts);
     });
 
 Program.parse(process.argv);
 
 function readSolidityFilesPath(source, solFiles) {
-  const files = Fs.readdirSync(source);
+  let files;
+  if (Utils.isOkDirectory(source)) {
+    files = Fs.readdirSync(source);
+  } else {
+    files = [source];
+  }
+
   for (file of files) {
-    const filename = Path.join(source, file);
+    const filename = file.indexOf('/') === 0 ? file : Path.join(source, file);
     if (Utils.isOkFile(filename) && Path.extname(filename) === '.sol') {
       solFiles.push(filename);
     }
@@ -66,20 +78,82 @@ function readSolidityFilesPath(source, solFiles) {
   };
 }
 
-function parseSolFile(solFile) {
+function parseSolFile(solFile, solObjects) {
   const contents = Fs.readFileSync(solFile, "utf8");
 
   let ast;
   try {
     ast = Solparser.parse(contents);
   } catch (e) {
-    console.error('Parse error');
-    console.error(e);
+    console.error('Parse error %s %s', e.message, e.stack);
     process.exit(1);
   }
 
-  if (ast.type === "Program") {
-    console.log(ast.body);
+  if (!ast.type === "Program" || !Array.isArray(ast.body) || ast.body.length <= 0) {
+    console.log(ast);
+    return;
   }
+
+  ast.body.forEach(item => {
+    switch (item.type) {
+      // import
+      case "ImportStatement":
+        console.log("[ %j ]", item);
+      break;
+      // contract
+      case "ContractStatement":
+        // console.log("[ %j ]", item.body);
+
+        // contract is xxx
+        contracts[item.name] = {is: item.is.map(item => item.name)};
+
+        // console.log(item);
+        for (let contractBody of item.body) {
+          // variable
+          if (contractBody.type === "StateVariableDeclaration") {
+            let variable = {
+              name        : contractBody.name, 
+              type        : contractBody.literal.literal, 
+              visibility  : contractBody.visibility, 
+              is_constant : contractBody.is_constant, 
+              value       : contractBody.value,
+            };
+        
+            console.log(variable);
+          } else
+          // function
+          if (contractBody.type === "FunctionDeclaration") {
+            let func = {
+              name         : contractBody.name, 
+              params       : contractBody.params, 
+              modifiers    : contractBody.modifers, 
+              // body         : contractBody.body,
+              returnParams : contractBody.returnParams, 
+              is_abstract  : contractBody.is_abstract, 
+            };
+        
+            console.log(func);
+          } else
+          // event
+          if (contractBody.type === "EventDeclaration") {
+          } else
+          // modifer
+          if (contractBody.type === "ModifierDeclaration") {
+          } else
+          // struct
+          if (contractBody.type === "StructDeclaration") {
+          } else
+          // using
+          if (contractBody.type === "UsingStatement") {
+          } else
+          console.log(contractBody);
+
+        }
+      break;
+
+      default:
+      break;
+    }
+  });
 }
 
